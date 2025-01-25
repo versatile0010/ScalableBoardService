@@ -3,8 +3,10 @@ package com.scalable.article.service
 import com.common.snowflake.Snowflake
 import com.scalable.article.dto.request.ArticleCreateRequest
 import com.scalable.article.dto.request.ArticleUpdateRequest
+import com.scalable.article.dto.response.ArticlePageResponse
 import com.scalable.article.dto.response.ArticleResponse
 import com.scalable.article.entity.Article
+import com.scalable.article.global.PageHelper
 import com.scalable.article.repository.ArticleRepository
 import com.scalable.article.repository.findByIdOrThrow
 import org.springframework.stereotype.Service
@@ -46,5 +48,32 @@ class ArticleService(
     @Transactional
     fun delete(articleId: Long) {
         articleRepository.deleteById(articleId)
+    }
+
+    fun readAll(
+        boardId: Long,
+        page: Long,
+        pageSize: Long,
+    ): ArticlePageResponse {
+
+        val articles = articleRepository.findAll(
+            boardId = boardId,
+            offset = PageHelper.getOffset(
+                page = page,
+                pageSize = pageSize,
+            ),
+            limit = pageSize,
+        )
+
+        val articleCount = PageHelper.getSearchablePageCount(
+            page = page,
+            pageSize = pageSize,
+            searchablePageCount = 10,
+        )
+
+        return ArticlePageResponse.of(
+            articles = articles,
+            articleCount = articleCount,
+        )
     }
 }
