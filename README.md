@@ -20,15 +20,16 @@ Details will be updated soon. 👀
 
 - Architecture can be restructured soon.
 
-| **Service**       | **Description** | **Port** |
-|-------------------|-----------------|----------|
-| **Common**        |                 | 9001     |
-| **Board Service** |                 |          |
-| `article`         |                 | 8080     |
-| `article-read`    |                 | 8081     |
-| `hot-article`     |                 | 8083     |
-| `comment`         |                 | 8082     |
-| `like`            |                 | 8084     |
-| `view`            |                 | 8085     |
+| **Service**       | **Description**                            | **Port** |
+|-------------------|--------------------------------------------|----------|
+| **Common**        |                                            |          |
+| ㄴ `snowflake`     | generate unique IDs for distributed system | none     |
+| **Board Service** |                                            |          |
+| ㄴ `article`       |                                            | 8080     |
+| ㄴ `article-read`  |                                            | 8081     |
+| ㄴ `hot-article`   |                                            | 8083     |
+| ㄴ `comment`       |                                            | 8082     |
+| ㄴ `like`          |                                            | 8084     |
+| ㄴ `view`          |                                            | 8085     |
 
 ---
