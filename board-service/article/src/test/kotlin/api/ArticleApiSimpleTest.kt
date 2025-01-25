@@ -1,17 +1,34 @@
 package api
 
+import com.scalable.article.ArticleApplication
 import com.scalable.article.dto.request.ArticleCreateRequest
 import com.scalable.article.dto.request.ArticleUpdateRequest
 import com.scalable.article.dto.response.ArticleResponse
 import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
+import org.springframework.boot.test.context.SpringBootTest
+import org.springframework.boot.test.context.SpringBootTest.WebEnvironment
+import org.springframework.boot.test.web.server.LocalServerPort
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
 import org.springframework.web.client.RestClient
 
-class ArticleControllerTest {
+@SpringBootTest(
+    classes = [ArticleApplication::class],
+    webEnvironment = WebEnvironment.RANDOM_PORT,
+)
+class ArticleApiSimpleTest {
 
-    private val restClient = RestClient.create("http://localhost:8080")
+    @LocalServerPort
+    private var port: Int = 0
+
+    private lateinit var client: RestClient
+
+    @BeforeEach
+    fun init() {
+        client = RestClient.create("http://localhost:$port")
+    }
 
     @Test
     fun `should create an article successfully`() {
@@ -28,7 +45,11 @@ class ArticleControllerTest {
 
         // then
         println("Created Article: $response")
-        assertArticleDetails(response, "testTitle", "testContent")
+        assertArticleDetails(
+            response = response,
+            expectedTitle = "testTitle",
+            expectedContent = "testContent",
+        )
     }
 
     @Test
@@ -67,12 +88,16 @@ class ArticleControllerTest {
             articleId = articleId,
             request = ArticleUpdateRequest(
                 title = "updatedTitle",
-                content = "updatedContent"
+                content = "updatedContent",
             )
         )
 
         // then
-        assertArticleDetails(response, "updatedTitle", "updatedContent")
+        assertArticleDetails(
+            response = response,
+            expectedTitle = "updatedTitle",
+            expectedContent = "updatedContent",
+        )
     }
 
     @Test
@@ -95,7 +120,7 @@ class ArticleControllerTest {
     }
 
     private fun create(request: ArticleCreateRequest): ArticleResponse =
-        restClient.post()
+        client.post()
             .uri("/v1/articles")
             .body(request)
             .retrieve()
@@ -103,14 +128,14 @@ class ArticleControllerTest {
             ?: throw IllegalStateException("Failed to create article")
 
     private fun read(articleId: Long): ArticleResponse =
-        restClient.get()
+        client.get()
             .uri("/v1/articles/{articleId}", articleId)
             .retrieve()
             .body(ArticleResponse::class.java)
             ?: throw IllegalStateException("Failed to read article")
 
     private fun update(articleId: Long, request: ArticleUpdateRequest): ArticleResponse =
-        restClient.put()
+        client.put()
             .uri("/v1/articles/{articleId}", articleId)
             .body(request)
             .retrieve()
@@ -118,7 +143,7 @@ class ArticleControllerTest {
             ?: throw IllegalStateException("Failed to update article")
 
     private fun delete(articleId: Long): ResponseEntity<Void> =
-        restClient.delete()
+        client.delete()
             .uri("/v1/articles/{articleId}", articleId)
             .retrieve()
             .toBodilessEntity()
