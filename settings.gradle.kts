@@ -8,4 +8,5 @@ include(
     "board-service:hot-article",
     "board-service:view",
     "board-service:like",
+    "common",
 )
