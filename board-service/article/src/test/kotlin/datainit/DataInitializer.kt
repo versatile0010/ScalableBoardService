@@ -1,4 +1,4 @@
-package data
+package datainit
 
 import com.common.snowflake.Snowflake
 import com.scalable.article.ArticleApplication
