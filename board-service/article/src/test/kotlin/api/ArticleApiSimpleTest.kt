@@ -3,6 +3,7 @@ package api
 import com.scalable.article.ArticleApplication
 import com.scalable.article.dto.request.ArticleCreateRequest
 import com.scalable.article.dto.request.ArticleUpdateRequest
+import com.scalable.article.dto.response.ArticlePageResponse
 import com.scalable.article.dto.response.ArticleResponse
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.BeforeEach
@@ -119,6 +120,22 @@ class ArticleApiSimpleTest {
         assertEquals(HttpStatus.NO_CONTENT, response.statusCode)
     }
 
+    @Test
+    fun `should read all articles successfully`() {
+        // when
+        val response = readAll(
+            boardId = 1L,
+            page = 599999L,
+            pageSize = 30L
+        )
+
+        // then
+        for(article in response.articles) {
+            println("Article: $article")
+        }
+
+    }
+
     private fun create(request: ArticleCreateRequest): ArticleResponse =
         client.post()
             .uri("/v1/articles")
@@ -133,6 +150,18 @@ class ArticleApiSimpleTest {
             .retrieve()
             .body(ArticleResponse::class.java)
             ?: throw IllegalStateException("Failed to read article")
+
+    private fun readAll(
+        boardId: Long,
+        page: Long,
+        pageSize: Long,
+    ): ArticlePageResponse {
+        return client.get()
+            .uri("/v1/articles?boardId=$boardId&page=$page&pageSize=$pageSize")
+            .retrieve()
+            .body(ArticlePageResponse::class.java)
+            ?: throw IllegalStateException("Failed to read articles")
+    }
 
     private fun update(articleId: Long, request: ArticleUpdateRequest): ArticleResponse =
         client.put()

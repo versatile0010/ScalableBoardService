@@ -5,6 +5,10 @@ import jakarta.persistence.Entity
 import jakarta.persistence.Id
 import java.time.LocalDateTime
 
+/**
+ *  Index
+ *  - create index idx_board_id_article_id on article(board_id asc, article_id desc);
+ */
 @Entity(name = "article")
 class Article(
     @Id

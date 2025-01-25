@@ -2,6 +2,7 @@ package com.scalable.article.controller
 
 import com.scalable.article.dto.request.ArticleCreateRequest
 import com.scalable.article.dto.request.ArticleUpdateRequest
+import com.scalable.article.dto.response.ArticlePageResponse
 import com.scalable.article.dto.response.ArticleResponse
 import com.scalable.article.service.ArticleService
 import org.springframework.http.ResponseEntity
@@ -11,6 +12,7 @@ import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.PutMapping
 import org.springframework.web.bind.annotation.RequestBody
+import org.springframework.web.bind.annotation.RequestParam
 import org.springframework.web.bind.annotation.RestController
 import java.net.URI
 
@@ -21,6 +23,20 @@ class ArticleController(
     @GetMapping("/v1/articles/{articleId}")
     fun read(@PathVariable articleId: Long): ResponseEntity<ArticleResponse> {
         val response = articleService.read(articleId)
+        return ResponseEntity.ok(response)
+    }
+
+    @GetMapping("/v1/articles")
+    fun readAll(
+        @RequestParam("boardId") boardId: Long,
+        @RequestParam("pageSize") pageSize: Long,
+        @RequestParam("page") page: Long,
+    ): ResponseEntity<ArticlePageResponse> {
+        val response = articleService.readAll(
+            boardId = boardId,
+            pageSize = pageSize,
+            page = page,
+        )
         return ResponseEntity.ok(response)
     }
 
