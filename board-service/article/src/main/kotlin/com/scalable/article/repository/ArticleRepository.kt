@@ -38,6 +38,36 @@ interface ArticleRepository : JpaRepository<Article, Long> {
         @Param("boardId") boardId: Long,
         @Param("limit") limit: Long,
     ): Long
+
+    @Query(
+        value = """
+             select article.article_id, article.title, article.content, article.board_id, article.writer_id, article.created_at, article.modified_at
+             from article 
+             where board_id = :boardId
+             order by article_id desc limit :limit
+        """,
+        nativeQuery = true,
+    )
+    fun findAllByBoardId(
+        @Param("boardId") boardId: Long,
+        @Param("limit") limit: Long,
+    ): List<Article>
+
+    @Query(
+        value = """
+             select article.article_id, article.title, article.content, article.board_id, article.writer_id, article.created_at, article.modified_at
+             from article 
+             where board_id = :boardId and article_id < :lastArticleId
+             order by article_id desc limit :limit
+        """,
+        nativeQuery = true,
+    )
+    fun findAllByBoardIdAndLastArticleId(
+        @Param("boardId") boardId: Long,
+        @Param("limit") limit: Long,
+        @Param("lastArticleId") lastArticleId: Long,
+    ): List<Article>
+
 }
 
 fun ArticleRepository.findByIdOrThrow(id: Long): Article {

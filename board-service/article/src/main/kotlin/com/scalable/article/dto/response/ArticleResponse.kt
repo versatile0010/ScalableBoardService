@@ -41,5 +41,14 @@ data class ArticlePageResponse(
                 articleCount = articleCount,
             )
         }
+
+        fun from(
+            articles: List<Article>,
+        ): ArticlePageResponse {
+            return ArticlePageResponse(
+                articles = articles.map { article -> ArticleResponse.from(article) },
+                articleCount = articles.size.toLong(),
+            )
+        }
     }
 }

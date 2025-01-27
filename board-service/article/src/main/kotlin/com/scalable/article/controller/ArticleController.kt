@@ -40,6 +40,20 @@ class ArticleController(
         return ResponseEntity.ok(response)
     }
 
+    @GetMapping("/v1/articles/cursor")
+    fun readAll(
+        @RequestParam("boardId") boardId: Long,
+        @RequestParam("pageSize") pageSize: Long,
+        @RequestParam(value = "lastArticleId", required = false) lastArticleId: Long?,
+    ): ResponseEntity<ArticlePageResponse> {
+        val response = articleService.readAll(
+            boardId = boardId,
+            pageSize = pageSize,
+            lastArticleId = lastArticleId,
+        )
+        return ResponseEntity.ok(response)
+    }
+
     @PostMapping("/v1/articles")
     fun create(@RequestBody request: ArticleCreateRequest): ResponseEntity<ArticleResponse> {
         val response = articleService.create(request)
