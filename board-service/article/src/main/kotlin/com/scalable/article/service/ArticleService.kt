@@ -76,4 +76,23 @@ class ArticleService(
             articleCount = articleCount,
         )
     }
+
+    fun readAll(
+        boardId: Long,
+        pageSize: Long,
+        lastArticleId: Long?,
+    ): ArticlePageResponse {
+        val articles = lastArticleId?.let {
+            return@let articleRepository.findAllByBoardIdAndLastArticleId(
+                boardId = boardId,
+                lastArticleId = it,
+                limit = pageSize,
+            )
+        } ?: articleRepository.findAllByBoardId(
+            boardId = boardId,
+            limit = pageSize,
+        )
+
+        return ArticlePageResponse.from(articles)
+    }
 }
