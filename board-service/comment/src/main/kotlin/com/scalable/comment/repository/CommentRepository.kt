@@ -24,6 +24,64 @@ interface CommentRepository : JpaRepository<Comment, Long> {
         @Param("parentCommentId") parentCommentId: Long,
         @Param("limit") limit: Long,
     ): Long
+
+    @Query(
+        value = """
+            select comment.comment_id, comment.parent_comment_id, comment.article_id, comment.writer_id,
+                   comment.content, comment.is_deleted,  comment.created_at
+            from (
+                select comment_id
+                from comment 
+                where article_id = :articleId
+                order by parent_comment_id, comment_id
+                limit :limit offset :offset
+            ) t left join comment on t.comment_id = comment.comment_id
+        """,
+        nativeQuery = true
+    )
+    fun findAllByArticleId(
+        @Param("articleId") articleId: Long,
+        @Param("offset") offset: Long,
+        @Param("limit") limit: Long,
+    ): List<Comment>
+
+    @Query(
+        value = """
+            select count(*)
+            from (
+                select comment_id
+                from comment
+                where article_id = :articleId
+                limit :limit
+            ) t
+        """,
+        nativeQuery = true
+    )
+    fun countAll(
+        @Param("articleId") articleId: Long,
+        @Param("limit") limit: Long,
+    ): Long
+
+    @Query(
+        value = """
+            select comment.comment_id, comment.parent_comment_id, comment.article_id, comment.writer_id,
+                   comment.content, comment.is_deleted,  comment.created_at
+            from (
+                select comment_id
+                from comment 
+                where article_id = :articleId and (comment_id, parent_comment_id) > (:lastCommentId, :lastParentCommentId)
+                order by parent_comment_id, comment_id
+                limit :limit
+            ) t left join comment on t.comment_id = comment.comment_id
+        """,
+        nativeQuery = true
+    )
+    fun findAllByArticeIdAndLastCommentIdAndLastParentCommentId(
+        @Param("articleId") articleId: Long,
+        @Param("lastCommentId") lastCommentId: Long,
+        @Param("lastParentCommentId") lastParentCommentId: Long,
+        @Param("limit") limit: Long,
+    ): List<Comment>
 }
 
 
