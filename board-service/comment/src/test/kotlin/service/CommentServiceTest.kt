@@ -1,6 +1,5 @@
 package service
 
-import com.common.snowflake.Snowflake
 import com.scalable.comment.CommentApplication
 import com.scalable.comment.entity.Comment
 import com.scalable.comment.repository.CommentRepository
@@ -26,7 +25,6 @@ class CommentServiceIntegrationTest {
     @BeforeEach
     fun clear() {
         commentRepository.deleteAll()
-        // 필요 시 초기 데이터 넣기
     }
 
     @Test
