@@ -23,9 +23,6 @@ class CommentServiceIntegrationTest {
     @Autowired
     lateinit var commentRepository: CommentRepository
 
-    @Autowired
-    lateinit var snowflake: Snowflake
-
     @BeforeEach
     fun clear() {
         commentRepository.deleteAll()
