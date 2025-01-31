@@ -29,13 +29,10 @@ interface CommentRepository : JpaRepository<Comment, Long> {
         value = """
             select comment.comment_id, comment.parent_comment_id, comment.article_id, comment.writer_id,
                    comment.content, comment.is_deleted,  comment.created_at
-            from (
-                select comment_id
-                from comment 
-                where article_id = :articleId
-                order by parent_comment_id, comment_id
-                limit :limit offset :offset
-            ) t left join comment on t.comment_id = comment.comment_id
+            from comment
+            where article_id = :articleId
+            order by parent_comment_id, comment_id 
+            limit :limit offset :offset
         """,
         nativeQuery = true
     )
