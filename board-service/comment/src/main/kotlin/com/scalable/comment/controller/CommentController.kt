@@ -1,6 +1,7 @@
 package com.scalable.comment.controller
 
 import com.scalable.comment.dto.request.CommentCreateRequest
+import com.scalable.comment.dto.response.CommentPageResponse
 import com.scalable.comment.dto.response.CommentResponse
 import com.scalable.comment.service.CommentService
 import org.springframework.http.ResponseEntity
@@ -9,6 +10,7 @@ import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RequestBody
+import org.springframework.web.bind.annotation.RequestParam
 import org.springframework.web.bind.annotation.RestController
 
 @RestController
@@ -20,6 +22,36 @@ class CommentController(
         @PathVariable("commentId") commentId: Long,
     ): ResponseEntity<CommentResponse> {
         val response = commentService.read(commentId)
+        return ResponseEntity.ok(response)
+    }
+
+    @GetMapping("/v1/comments")
+    fun readAll(
+        @RequestParam("articleId") articleId: Long,
+        @RequestParam("pageSize") pageSize: Long,
+        @RequestParam("page") page: Long,
+    ): ResponseEntity<CommentPageResponse> {
+        val response = commentService.readAll(
+            articleId = articleId,
+            page = page,
+            pageSize = pageSize,
+        )
+        return ResponseEntity.ok(response)
+    }
+
+    @GetMapping("/v1/comments/cursor")
+    fun readAll(
+        @RequestParam("articleId") articleId: Long,
+        @RequestParam(value = "lastParentCommentId", required = false) lastParentCommentId: Long?,
+        @RequestParam(value = "lastCommentId", required = false) lastCommentId: Long?,
+        @RequestParam("limit") limit: Long,
+    ): ResponseEntity<CommentPageResponse> {
+        val response = commentService.readAll(
+            articleId = articleId,
+            lastCommentId = lastCommentId,
+            lastParentCommentId = lastParentCommentId,
+            limit = limit,
+        )
         return ResponseEntity.ok(response)
     }
 

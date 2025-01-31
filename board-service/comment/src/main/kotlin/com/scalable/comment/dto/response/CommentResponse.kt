@@ -26,3 +26,29 @@ data class CommentResponse(
         }
     }
 }
+
+data class CommentPageResponse(
+    val comments: List<CommentResponse>,
+    val commentCount: Long,
+) {
+    companion object {
+        fun of(
+            comments: List<Comment>,
+            commentCount: Long,
+        ): CommentPageResponse {
+            return CommentPageResponse(
+                comments = comments.map { comment -> CommentResponse.from(comment) },
+                commentCount = commentCount,
+            )
+        }
+
+        fun from(
+            comments: List<Comment>,
+        ): CommentPageResponse {
+            return CommentPageResponse(
+                comments = comments.map { comment -> CommentResponse.from(comment) },
+                commentCount = comments.size.toLong(),
+            )
+        }
+    }
+}

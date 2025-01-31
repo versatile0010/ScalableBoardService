@@ -2,8 +2,10 @@ package com.scalable.comment.service
 
 import com.common.snowflake.Snowflake
 import com.scalable.comment.dto.request.CommentCreateRequest
+import com.scalable.comment.dto.response.CommentPageResponse
 import com.scalable.comment.dto.response.CommentResponse
 import com.scalable.comment.entity.Comment
+import com.scalable.comment.global.PageHelper
 import com.scalable.comment.repository.CommentRepository
 import com.scalable.comment.repository.findActivatedByIdOrThrow
 import com.scalable.comment.repository.findByIdOrThrow
@@ -45,6 +47,53 @@ class CommentService(
         } else {
             deleteCascade(comment)
         }
+    }
+
+    fun readAll(
+        articleId: Long,
+        page: Long,
+        pageSize: Long,
+    ): CommentPageResponse {
+        val comments = commentRepository.findAllByArticleId(
+            articleId = articleId,
+            offset = PageHelper.getOffset(
+                page = page,
+                pageSize = pageSize,
+            ),
+            limit = pageSize,
+        )
+        val commentCount = PageHelper.getSearchablePageCount(
+            page = page,
+            pageSize = pageSize,
+            searchablePageCount = 10L
+        )
+        return CommentPageResponse.of(
+            comments = comments,
+            commentCount = commentCount,
+        )
+    }
+
+    fun readAll(
+        articleId: Long,
+        lastCommentId: Long?,
+        lastParentCommentId: Long?,
+        limit: Long,
+    ): CommentPageResponse {
+        val comments = if (lastCommentId != null && lastParentCommentId != null) {
+            commentRepository.findAllByArticeIdAndLastCommentIdAndLastParentCommentId(
+                articleId = articleId,
+                lastCommentId = lastCommentId,
+                lastParentCommentId = lastParentCommentId,
+                limit = limit,
+            )
+        } else {
+            commentRepository.findAllByArticleId(
+                articleId = articleId,
+                offset = 0L,
+                limit = limit,
+            )
+        }
+        return CommentPageResponse.from(comments)
     }
 
     private fun deleteCascade(comment: Comment) {
