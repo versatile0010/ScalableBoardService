@@ -5,6 +5,7 @@ import com.scalable.article.dto.request.ArticleCreateRequest
 import com.scalable.article.dto.request.ArticleUpdateRequest
 import com.scalable.article.dto.response.ArticlePageResponse
 import com.scalable.article.dto.response.ArticleResponse
+import com.scalable.article.dto.response.BoardArticleCountResponse
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -130,10 +131,18 @@ class ArticleApiSimpleTest {
         )
 
         // then
-        for(article in response.articles) {
+        for (article in response.articles) {
             println("Article: $article")
         }
+    }
 
+    @Test
+    fun `should count articles successfully`() {
+        // when
+        val response = count(boardId = 1L)
+
+        // then
+        println("Board Article Count: $response")
     }
 
     private fun create(request: ArticleCreateRequest): ArticleResponse =
@@ -176,6 +185,13 @@ class ArticleApiSimpleTest {
             .uri("/v1/articles/{articleId}", articleId)
             .retrieve()
             .toBodilessEntity()
+
+    private fun count(boardId: Long): BoardArticleCountResponse =
+        client.get()
+            .uri("/v1/articles/boards/{boardId}/count", boardId)
+            .retrieve()
+            .body(BoardArticleCountResponse::class.java)
+            ?: throw IllegalStateException("Failed to count articles")
 
     private fun assertArticleDetails(response: ArticleResponse, expectedTitle: String, expectedContent: String) {
         assertEquals(expectedTitle, response.title)
