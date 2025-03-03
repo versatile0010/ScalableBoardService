@@ -5,10 +5,15 @@ import com.scalable.article.dto.request.ArticleCreateRequest
 import com.scalable.article.dto.request.ArticleUpdateRequest
 import com.scalable.article.dto.response.ArticlePageResponse
 import com.scalable.article.dto.response.ArticleResponse
+import com.scalable.article.dto.response.BoardArticleCountResponse
 import com.scalable.article.entity.Article
 import com.scalable.article.global.PageHelper
 import com.scalable.article.repository.ArticleRepository
+import com.scalable.article.repository.BoardArticleCountRepository
+import com.scalable.article.repository.decreaseIfNotExistsThenInit
 import com.scalable.article.repository.findByIdOrThrow
+import com.scalable.article.repository.increaseIfNotExistsThenInit
+import org.springframework.data.repository.findByIdOrNull
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 
@@ -16,6 +21,7 @@ import org.springframework.transaction.annotation.Transactional
 class ArticleService(
     private val snowflake: Snowflake,
     private val articleRepository: ArticleRepository,
+    private val boardArticleCountRepository: BoardArticleCountRepository,
 ) {
 
     @Transactional
@@ -29,6 +35,7 @@ class ArticleService(
                 request.writerId,
             )
         )
+        boardArticleCountRepository.increaseIfNotExistsThenInit(request.boardId)
         return ArticleResponse.from(savedArticle)
     }
 
@@ -47,7 +54,9 @@ class ArticleService(
 
     @Transactional
     fun delete(articleId: Long) {
-        articleRepository.deleteById(articleId)
+        val article = articleRepository.findByIdOrThrow(articleId)
+        articleRepository.delete(article)
+        boardArticleCountRepository.decreaseIfNotExistsThenInit(article.boardId)
     }
 
     fun readAll(
@@ -94,5 +103,14 @@ class ArticleService(
         )
 
         return ArticlePageResponse.from(articles)
+    }
+
+    fun count(boardId: Long): BoardArticleCountResponse {
+        val boardArticleCount = boardArticleCountRepository.findByIdOrNull(boardId)
+        return if (boardArticleCount == null) {
+            BoardArticleCountResponse(0)
+        } else {
+            BoardArticleCountResponse.from(boardArticleCount)
+        }
     }
 }

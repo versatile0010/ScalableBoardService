@@ -4,6 +4,7 @@ import com.scalable.article.dto.request.ArticleCreateRequest
 import com.scalable.article.dto.request.ArticleUpdateRequest
 import com.scalable.article.dto.response.ArticlePageResponse
 import com.scalable.article.dto.response.ArticleResponse
+import com.scalable.article.dto.response.BoardArticleCountResponse
 import com.scalable.article.service.ArticleService
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.DeleteMapping
@@ -77,5 +78,11 @@ class ArticleController(
     fun delete(@PathVariable articleId: Long): ResponseEntity<Unit> {
         articleService.delete(articleId)
         return ResponseEntity.noContent().build()
+    }
+
+    @GetMapping("/v1/articles/boards/{boardId}/count")
+    fun count(@PathVariable boardId: Long): ResponseEntity<BoardArticleCountResponse> {
+        val response = articleService.count(boardId)
+        return ResponseEntity.ok(response)
     }
 }
