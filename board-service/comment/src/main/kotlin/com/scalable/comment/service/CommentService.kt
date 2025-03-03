@@ -2,19 +2,25 @@ package com.scalable.comment.service
 
 import com.common.snowflake.Snowflake
 import com.scalable.comment.dto.request.CommentCreateRequest
+import com.scalable.comment.dto.response.CommentCountResponse
 import com.scalable.comment.dto.response.CommentPageResponse
 import com.scalable.comment.dto.response.CommentResponse
 import com.scalable.comment.entity.Comment
 import com.scalable.comment.global.PageHelper
+import com.scalable.comment.repository.ArticleCommentCountRepository
 import com.scalable.comment.repository.CommentRepository
+import com.scalable.comment.repository.decreaseIfNotExistsThenInit
 import com.scalable.comment.repository.findActivatedByIdOrThrow
 import com.scalable.comment.repository.findByIdOrThrow
+import com.scalable.comment.repository.increaseIfNotExistsThenInit
+import org.springframework.data.repository.findByIdOrNull
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 
 @Service
 class CommentService(
     private val commentRepository: CommentRepository,
+    private val articleCommentCountRepository: ArticleCommentCountRepository,
     private val snowflake: Snowflake,
 ) {
 
@@ -30,6 +36,7 @@ class CommentService(
                 writerId = request.writerId,
             )
         )
+        articleCommentCountRepository.increaseIfNotExistsThenInit(request.articleId)
         return CommentResponse.from(savedComment)
     }
 
@@ -96,8 +103,18 @@ class CommentService(
         return CommentPageResponse.from(comments)
     }
 
+    fun count(articleId: Long): CommentCountResponse {
+        val commentCount = articleCommentCountRepository.findByIdOrNull(articleId)
+        return if (commentCount == null) {
+            CommentCountResponse(0L)
+        } else {
+            CommentCountResponse(commentCount.commentCount)
+        }
+    }
+
     private fun deleteCascade(comment: Comment) {
         commentRepository.delete(comment)
+        articleCommentCountRepository.decreaseIfNotExistsThenInit(comment.articleId)
         if (!comment.isRoot()) {
             val parent = commentRepository.findByIdOrThrow(comment.parentCommentId)
             // 이미 softDelete 된 부모이고, 더 이상 자식이 없으면

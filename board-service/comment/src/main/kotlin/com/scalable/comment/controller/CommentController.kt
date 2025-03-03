@@ -1,8 +1,10 @@
 package com.scalable.comment.controller
 
 import com.scalable.comment.dto.request.CommentCreateRequest
+import com.scalable.comment.dto.response.CommentCountResponse
 import com.scalable.comment.dto.response.CommentPageResponse
 import com.scalable.comment.dto.response.CommentResponse
+import com.scalable.comment.entity.ArticleCommentCount
 import com.scalable.comment.service.CommentService
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.DeleteMapping
@@ -69,5 +71,14 @@ class CommentController(
     ): ResponseEntity<Unit> {
         commentService.delete(commentId)
         return ResponseEntity.noContent().build()
+    }
+
+
+    @GetMapping("/v1/comments/articles/{articleId}")
+    fun count(
+        @PathVariable("articleId") articleId: Long,
+    ): ResponseEntity<CommentCountResponse> {
+        val response = commentService.count(articleId)
+        return ResponseEntity.ok(response)
     }
 }

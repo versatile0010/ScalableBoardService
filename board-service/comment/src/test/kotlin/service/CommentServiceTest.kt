@@ -4,6 +4,7 @@ import com.scalable.comment.CommentApplication
 import com.scalable.comment.entity.Comment
 import com.scalable.comment.repository.CommentRepository
 import com.scalable.comment.service.CommentService
+import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
