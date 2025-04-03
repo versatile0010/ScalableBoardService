@@ -55,6 +55,13 @@ class HotArticleRepository(
         )
     }
 
+    fun remove(
+        articleId: Long,
+        time: LocalDateTime,
+    ) {
+        redisTemplate.opsForZSet().remove(generateKey(time), articleId.toString())
+    }
+
     fun readAll(timeString: String): List<String> {
         return redisTemplate.opsForZSet()
             .reverseRangeWithScores(generateKey(timeString), 0, -1)
