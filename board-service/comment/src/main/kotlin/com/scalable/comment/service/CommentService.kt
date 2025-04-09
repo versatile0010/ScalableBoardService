@@ -1,5 +1,9 @@
 package com.scalable.comment.service
 
+import com.common.event.EventType
+import com.common.event.payload.CommentCreatedEventPayload
+import com.common.event.payload.CommentDeletedEventPayload
+import com.common.outboxrelay.OutboxEventPublisher
 import com.common.snowflake.Snowflake
 import com.scalable.comment.dto.request.CommentCreateRequest
 import com.scalable.comment.dto.response.CommentCountResponse
@@ -19,9 +23,10 @@ import org.springframework.transaction.annotation.Transactional
 
 @Service
 class CommentService(
+    private val snowflake: Snowflake,
+    private val outboxEventPublisher: OutboxEventPublisher,
     private val commentRepository: CommentRepository,
     private val articleCommentCountRepository: ArticleCommentCountRepository,
-    private val snowflake: Snowflake,
 ) {
 
     @Transactional
@@ -37,6 +42,20 @@ class CommentService(
             )
         )
         articleCommentCountRepository.increaseIfNotExistsThenInit(request.articleId)
+        outboxEventPublisher.publish(
+            type = EventType.COMMENT_CREATED,
+            payload = CommentCreatedEventPayload(
+                commentId = savedComment.commentId,
+                content = savedComment.content,
+                articleId = savedComment.articleId,
+                writerId = savedComment.writerId,
+                createdAt = savedComment.createdAt,
+                articleCommentCount = count(savedComment.articleId).commentCount,
+                path = null,
+                deleted = false,
+            ),
+            shardKey = savedComment.articleId,
+        )
         return CommentResponse.from(savedComment)
     }
 
@@ -54,6 +73,20 @@ class CommentService(
         } else {
             deleteCascade(comment)
         }
+        outboxEventPublisher.publish(
+            type = EventType.COMMENT_DELETED,
+            payload = CommentDeletedEventPayload(
+                commentId = comment.commentId,
+                content = comment.content,
+                articleId = comment.articleId,
+                writerId = comment.writerId,
+                createdAt = comment.createdAt,
+                articleCommentCount = count(comment.articleId).commentCount,
+                path = null,
+                deleted = true,
+            ),
+            shardKey = comment.articleId,
+        )
     }
 
     fun readAll(

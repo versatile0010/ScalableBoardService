@@ -11,5 +11,6 @@ include(
     "common-service",
     "common-service:snowflake",
     "common-service:data-serializer",
-    "common-service:event"
+    "common-service:event",
+    "common-service:outbox-relay"
 )
