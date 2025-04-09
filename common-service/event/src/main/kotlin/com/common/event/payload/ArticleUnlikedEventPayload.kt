@@ -7,5 +7,5 @@ data class ArticleUnlikedEventPayload(
     val articleId: Long,
     val userId: Long,
     val createdAt: LocalDateTime,
-    val articleLikeCount: Int,
+    val articleLikeCount: Long,
 ) : EventPayload
