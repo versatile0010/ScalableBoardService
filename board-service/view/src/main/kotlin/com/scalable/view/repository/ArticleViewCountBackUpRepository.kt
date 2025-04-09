@@ -23,14 +23,16 @@ interface ArticleViewCountBackUpRepository : JpaRepository<ArticleViewCount, Lon
     )
 }
 
-fun ArticleViewCountBackUpRepository.updateViewCountIfNotExistsThenInit(articleId: Long, viewCount: Long) {
+fun ArticleViewCountBackUpRepository.updateViewCountIfNotExistsThenInit(
+    articleId: Long,
+    viewCount: Long
+): ArticleViewCount {
     val articleViewCount = findByIdOrNull(articleId)
     if (articleViewCount != null) {
         updateViewCount(
             articleId = articleId,
             viewCount = viewCount,
         )
-    } else {
-        save(ArticleViewCount.init(articleId = articleId, viewCount = viewCount))
     }
+    return save(ArticleViewCount.init(articleId = articleId, viewCount = viewCount))
 }

@@ -1,5 +1,10 @@
 package com.scalable.article.service
 
+import com.common.event.EventType
+import com.common.event.payload.ArticleCreatedEventPayload
+import com.common.event.payload.ArticleDeletedEventPayload
+import com.common.event.payload.ArticleUpdatedEventPayload
+import com.common.outboxrelay.OutboxEventPublisher
 import com.common.snowflake.Snowflake
 import com.scalable.article.dto.request.ArticleCreateRequest
 import com.scalable.article.dto.request.ArticleUpdateRequest
@@ -20,6 +25,7 @@ import org.springframework.transaction.annotation.Transactional
 @Service
 class ArticleService(
     private val snowflake: Snowflake,
+    private val outboxEventPublisher: OutboxEventPublisher,
     private val articleRepository: ArticleRepository,
     private val boardArticleCountRepository: BoardArticleCountRepository,
 ) {
@@ -36,6 +42,20 @@ class ArticleService(
             )
         )
         boardArticleCountRepository.increaseIfNotExistsThenInit(request.boardId)
+        outboxEventPublisher.publish(
+            type = EventType.ARTICLE_CREATED,
+            payload = ArticleCreatedEventPayload(
+                articleId = savedArticle.articleId,
+                title = savedArticle.title,
+                content = savedArticle.content,
+                writerId = savedArticle.writerId,
+                boardId = savedArticle.boardId,
+                createdAt = savedArticle.createdAt,
+                modifiedAt = savedArticle.modifiedAt,
+                boardArticleCount = count(savedArticle.boardId).articleCount,
+            ),
+            shardKey = savedArticle.boardId,
+        )
         return ArticleResponse.from(savedArticle)
     }
 
@@ -43,6 +63,19 @@ class ArticleService(
     fun update(articleId: Long, request: ArticleUpdateRequest): ArticleResponse {
         val article = articleRepository.findByIdOrThrow(articleId)
             .update(title = request.title, content = request.content)
+        outboxEventPublisher.publish(
+            type = EventType.ARTICLE_UPDATED,
+            payload = ArticleUpdatedEventPayload(
+                articleId = article.articleId,
+                title = article.title,
+                content = article.content,
+                writerId = article.writerId,
+                boardId = article.boardId,
+                createdAt = article.createdAt,
+                modifiedAt = article.modifiedAt,
+            ),
+            shardKey = article.boardId,
+        )
         return ArticleResponse.from(article)
     }
 
@@ -57,6 +90,20 @@ class ArticleService(
         val article = articleRepository.findByIdOrThrow(articleId)
         articleRepository.delete(article)
         boardArticleCountRepository.decreaseIfNotExistsThenInit(article.boardId)
+        outboxEventPublisher.publish(
+            type = EventType.ARTICLE_DELETED,
+            payload = ArticleDeletedEventPayload(
+                articleId = article.articleId,
+                title = article.title,
+                content = article.content,
+                writerId = article.writerId,
+                boardId = article.boardId,
+                createdAt = article.createdAt,
+                modifiedAt = article.modifiedAt,
+                boardArticleCount = count(article.boardId).articleCount,
+            ),
+            shardKey = article.boardId,
+        )
     }
 
     fun readAll(

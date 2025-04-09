@@ -20,7 +20,7 @@ interface ArticleLikeCountRepository : JpaRepository<ArticleLikeCount, Long> {
         nativeQuery = true,
     )
     @Modifying
-    fun increase(@Param("articleId") articleId: Long): Int
+    fun increase(@Param("articleId") articleId: Long): Long
 
     @Query(
         value = """
@@ -29,7 +29,7 @@ interface ArticleLikeCountRepository : JpaRepository<ArticleLikeCount, Long> {
         nativeQuery = true,
     )
     @Modifying
-    fun decrease(@Param("articleId") articleId: Long): Int
+    fun decrease(@Param("articleId") articleId: Long): Long
 }
 
 fun ArticleLikeCountRepository.findLockedByArticleIdOrThrow(articleId: Long): ArticleLikeCount {
