@@ -1,2 +1,26 @@
 server:
   port: 8081
+
+spring:
+  application:
+    name: article-read-service
+  data:
+    redis:
+      host: 127.0.0.1
+      port: 6379
+  kafka:
+    bootstrap-servers: localhost:9092
+    consumer:
+      group-id: article-read-service
+      key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+      value-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+      enable-auto-commit: false
+endpoints:
+  article-service:
+    url: http://localhost:8080
+  comment-service:
+    url: http://localhost:8082
+  like-service:
+    url: http://localhost:8084
+  view-service:
+    url: http://localhost:8085
