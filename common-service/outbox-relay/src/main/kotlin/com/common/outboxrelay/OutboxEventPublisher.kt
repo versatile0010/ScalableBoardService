@@ -9,8 +9,8 @@ import org.springframework.stereotype.Component
 
 @Component
 class OutboxEventPublisher(
-    private val outboxIdGenerator: Snowflake,
-    private val eventIdGenerator: Snowflake,
+    private val outboxIdGenerator: Snowflake = Snowflake(),
+    private val eventIdGenerator: Snowflake = Snowflake(),
     private val eventPublisher: ApplicationEventPublisher,
 ) {
     fun publish(
